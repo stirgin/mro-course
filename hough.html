@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Segmentation</title>
+	<meta charset="UTF-8">
+		<style>
+	body{
+	background:	rgba(0,0,0,0.2);
+	}
+	canvas{
+    border: 2px solid #000;
+    cursor:pointer;
+  	}
+  	.first{
+  		background-color: rgba(0,0,0,0.3);
+  	}
+  	table{
+  		font-size: 0.85em;
+  		margin-bottom: 20px;
+  	}
+  	caption{
+  		font-size: 2em;
+  	}
+	div{
+		height: auto;
+	}
+  	a{
+  		display: block;
+  		width: 100px;
+  		text-align:center;
+  		padding: 10px;
+  		border: 1px solid black;
+  		background-color: #2271B3;
+  		cursor: pointer;
+	
+  	}
+  	a:hover{
+  		background-color: rgba(100,0,200,0.2);
+  	}
+	</style>
+	
+</head>
+<body>
+	<div>
+		<input type="file" class="files" name="files[]" multiple />
+		<canvas id="drawingCanvas" width="700" height="600" ></canvas>
+		<a id="download">Download</a>
+		<a href="bug.html" id="bug">Bug</a>
+		<div id="oil" style="width: 2000px; height: 400px;"></div>
+	</div>
+	<div>
+    <table class="tab" border="1">
+    <caption>Таблица координат</caption>
+	<tbody>
+		
+	</tbody>
+    </table>
+    </div>
+
+    <div>
+    <table class="tab2" border="1">
+    <caption>Таблица пространсва Хафа</caption>
+	<tbody>
+		
+	</tbody>
+    </table>
+    </div>
+    
+    <script src="jquery.min.js"></script>  
+    <script src="jsapi.js"></script>
+	<script>
+	
+	var count, img, width, height, thisX, thisY, titles, all, images, objPixels, countObj, pixel, arrayPixel, arrayPixel2, canvas, ctx,
+	 buffer, img, count, thisY, thisX , countObj, objPixels, distanceR, sortCoordsValue, numberOfValuesInArray, histogram , colors ,
+	  arrayNumbers, jsonObj,
+ 	maxCoordValue;
+ 	count = 0;
+ 	thisY = 0; 
+ 	thisX = 0; 
+ 	countObj = 0; 
+ 	objPixels = [];
+ 	distanceR = []; 
+ 	sortCoordsValue = []; 
+ 	numberOfValuesInArray = [];
+ 	histogram = [];
+ 	colors = []; 
+ 	arrayNumbers = [];
+
+ 	var a = 0, x = 1, r = 1;
+ 	var titles = [], all = [], images = [];
+  	jsonObj = new JsonObject();
+
+ 	Array.prototype.max = function() {
+	  return Math.max.apply(null, this);
+	};
+
+	Array.prototype.min = function() {
+	  return Math.min.apply(null, this);
+	};
+
+
+	canvas = document.getElementById('drawingCanvas');
+	ctx = canvas.getContext('2d');
+
+	width = 700;
+	height = 600;
+	
+	img = new Image();
+	img.src = 'test1.png';
+
+
+function addNewRow(array){
+        var tabl,str,length,count;
+        count=0;
+        length = array.length/2;
+        tabl = $('.tab tbody');
+        str ='<tr class="first"><th>'+'Number'+'</th>';
+        strX = '<tr><th>'+'X'+'</th>';
+        strY = '<tr><th>'+'Y'+'</th>';
+        for(var i=1;i<=length;i++){
+        	str+='<th>'+i+'</th>';
+        	strX+='<th>'+array[count]+'</th>';
+        	strY+='<th>'+array[count+1]+'</th>';
+        	count+=2;
+        	if(i%50==0){
+        		 str+='</tr>';
+        strX+='</tr>';
+        strY+='</tr>';
+        tabl.append(str);
+        tabl.append(strX);
+        tabl.append(strY);
+        str ='<tr class="first"><th>'+'Number'+'</th>';
+        strX = '<tr><th>'+'X'+'</th>';
+        strY = '<tr><th>'+'Y'+'</th>';
+        	}
+        }
+        str+='</tr>';
+        strX+='</tr>';
+        strY+='</tr>';
+        tabl.append(str);
+        tabl.append(strX);
+        tabl.append(strY);
+}	
+
+function addNewRows(array,grad){
+	    distanceR = null;
+		distanceR = [];
+        var tabl,str,length,count,buff;
+        count=0;
+        length = array.length/2;
+     tabl = $('.tab2 tbody');
+        str ='<tr class="first"><th>'+'Point'+'</th>';
+        strX = '<tr><th>'+grad+'</th>';
+
+        for(var i=1;i<=length;i++){
+
+        	buff =  Math.floor(array[count] * Math.cos(grad) + array[count+1] * Math.sin(grad));
+        	( buff > 0 ) ? distanceR[i-1] = buff : distanceR[i-1] = -buff ;
+
+
+        	str+='<th>'+i+'</th>';
+        	strX+='<th>'+distanceR[i-1]+'</th>';
+        	count+=2;
+
+        	if(i%50==0){
+	        str += '</tr>';
+	        strX += '</tr>';
+	        tabl.append(str);
+	        tabl.append(strX);
+	        str = '<tr class="first"><th>' + 'Point' + '</th>';
+	        strX = '<tr><th>' + grad + '</th>';
+        	}
+        }
+        str+='</tr>';
+        strX+='</tr>';
+
+        tabl.append(str);
+        tabl.append(strX);
+}	
+
+function getMaxValue(value) {
+	for(var i = 0; i < distanceR.length; i++)
+	if (distanceR[i]==value) {
+
+		y = coordArray[(i-1)*2+1];
+		x = coordArray[(i-1)*2];
+
+		coord = y * width * 4 + x*4;
+
+		pix[coord]=color[0];
+	    pix[coord+1]=color[1];
+	    pix[coord+2]=color[2];
+
+	}
+}
+
+var pixelCount = 1;
+var coordArray = [];
+
+var setCoord = (function() {
+	var count = 0;
+	return function(x,y){
+	        coordArray[count] = x;
+	        coordArray[count + 1] = y;
+	        count += 2;
+	        };
+})();
+
+
+
+function getNumberOfValuesInArray(array) {
+var buff = 0 , count = 0 , length = array.length;
+	for(var i = 0 ; i < length ; i++) {
+		numberOfValuesInArray[array[i]]++;
+	}
+	return numberOfValuesInArray;
+}
+
+function init() {
+		for(var i = 0 ; i <=  maxCoordValue ; i++) {
+			 numberOfValuesInArray[i] = 0;
+		//	 colors[i] = '#001';	
+		}
+
+		 //options.colors = '#001';
+}
+
+function setHistogram() {
+var count = 1;
+	for(var i = 0 ; i <=  maxCoordValue ; i++) 
+	histogram[count++] = [i + '',numberOfValuesInArray[i]];
+}
+
+function search() {
+ 	getXandY(arrayPixel);
+ 	if(thisY < height && thisX < width){
+	 	setCoord(thisX,thisY);
+	 	pixelCount++;
+ 	}
+}
+
+	img.onload = function () {
+	
+	 ctx.drawImage(img, 0, 0);
+     
+  arrayPixel = getArrayPixel();
+     // arrayPixel2 = getArrayPixel2();
+	while(thisY<height && thisX<width) {
+		search();
+	}
+     addNewRow(coordArray);
+     //0 , 1.57  , 3.14
+     addNewRows(coordArray,1.57);
+     maxCoordValue = distanceR.max();
+     init();  
+
+   	 getNumberOfValuesInArray(distanceR);
+	// getArrayValueOfHistogram();
+	// setHistogram();
+	// google.setOnLoadCallback(drawChart);
+	 firstArray = getArray(firstMax());
+	 lastArray = getArray(lastMax());
+	 setpixel2(firstArray);
+	 setpixel2(lastArray);
+
+	 addNewRows(coordArray,3.14);
+	 maxCoordValue = distanceR.max();
+     init();
+     getNumberOfValuesInArray(distanceR);
+
+     firstArray2 = getArray(lastMax2());
+	 lastArray2 = getArray(lastMax());
+	 setpixel2(firstArray2);
+	 setpixel2(lastArray2);
+
+    // setHistogram();
+     //google.setOnLoadCallback(drawChart);
+    //arrayNumbers = cutArray(arrayPixel,516, 207, 595, 303);
+    arrayNumbers = cutArray(arrayPixel,firstArray2[1][1], firstArray[1][0], lastArray2[1][1], lastArray[1][0]);
+     jsonObj.saveStorage('segmentArray',arrayNumbers);
+	};
+
+
+var firstArray, lastArray;
+firstArray = lastArray = [];
+
+var firstArray2, lastArray2;
+firstArray2 = lastArray2 = [];
+
+
+function getArray(value) {
+var l,l2,count,newArray;
+newArray = [];
+count = 0;
+l2 = distanceR.length;
+	for(var i = 0; i < l2; ++i) {
+		if(distanceR[i] == value) {
+			newArray[count] = [];
+			newArray[count][0] = coordArray[i*2-1];
+			newArray[count][1] = coordArray[i*2];
+			count++;
+		}
+	}
+	return newArray;
+}
+
+function getArrayValueOfHistogram() {
+
+var arr, length, count, value, count;
+arr = [],arrayX = [], arrayY = [];
+
+	count=0;
+	length = numberOfValuesInArray.length;
+	for(var i = 0; i < length; ++i) {
+		if(numberOfValuesInArray[i]>300){
+			arr[count] = i;
+			++count;
+		}
+
+	}
+
+
+
+
+var x,y,coord,array , arrayCount,l;
+array = []; arrayCount = 0;
+value = arr[0];
+l = distanceR.length;	console.log(value);
+for(var i = 0; i < l; i++)
+	if (distanceR[i]==value) {
+		y = coordArray[(i-1)*2+1];
+		x = coordArray[(i-1)*2];
+		arrayX[arrayCount] = x;
+		arrayY[arrayCount] = y;
+		arrayCount++;
+
+}
+sortArrayStep(arrayX,arrayY);
+
+return arrayX;	
+}
+
+
+function sortArrayStep(array,array2) {
+l = array.length;
+	for(var i = 2;i < l; ++i){
+		if(i==2 && (array[i-2]!=(array[i-1])-1)){
+			array = array.slice(i-2,l);
+			i--;
+		}
+		if((array[i-2]!=(array[i-1])-1) && (array[i-1]!=(array[i])-1)) {
+			array = array.slice(i,l);
+			i--;
+		//	array2.slice(i-1,1);
+		}
+
+	}
+}
+
+
+function getArrayPixel(){
+	var data, light, arr, pix, time1;
+	picLength = width * height;
+	arr=[];
+	console.log("getArrayPixel - Start");
+	for(var i = 0;i<height;i++)
+	    arr[i]=[];
+	for(var i = 0;i<height;i++){
+	    for(var j = 0;j<width;j++){
+	     pix = ctx.getImageData(j,i, 1, 1);
+	     data = pix.data;
+	     light = (data[0] + data[1] + data[2] ) /3;
+	     arr[i][j]=Math.floor(light);
+	    }
+	    
+	   
+	   }
+	  console.log("getArrayPixel - End");
+	  return arr;
+}
+
+function timeLog(time1){
+var time2, hour, minute;
+	    time2 = new Date();
+	    hour = time2.getHours()-time1.getHours();
+	    minute = time2.getMinutes()-time1.getMinutes();
+	    console.log(hour+" : "+minute);
+}
+
+function setArrayPixel(array){
+	var data, light, arr, pix;
+	picLength=width*height;
+	arr=[];
+	data = ctx.getImageData(0,0,width,height);
+	pix = data.data;
+		var r,g,b,o;
+		r=0,g=1,b=2,o=3;
+	for(var i = 0;i<height;i++){
+		for(var j = 0;j<width;j++,r+= 4,g+= 4,b+= 4,o+= 4){
+	if(objPixels[countObj].rgb[0]==array[i][j]){
+			arr[r]=objPixels[countObj].rgb[0];
+	     	arr[g]=objPixels[countObj].rgb[1];
+	     	arr[b]=objPixels[countObj].rgb[2];
+	     	arr[o]=255;
+	}
+	else{
+			arr[r]=array[i][j];
+	     	arr[g]=array[i][j];
+	     	arr[b]=array[i][j];
+	     	arr[o]=255;
+		}	
+	     	
+		}
+	}
+	     	
+	for(var i = 0,j = 1,n = 2;i<picLength*4;i += 4,j += 4,n += 4){
+	     	pix[i]=arr[i];
+	     	pix[j]=arr[j];
+	     	pix[n]=arr[n];
+	}
+	  
+	  data.data=pix;
+
+	  putColorData(data);
+}
+
+
+function firstMax(){
+  var max,l;
+  l = numberOfValuesInArray.length;
+  max = (numberOfValuesInArray.max()/5)*4;
+    for(var i = 0; i < l; ++i) {
+      	if(numberOfValuesInArray[i]>=max){
+	        max = i;
+	        break;
+    	}
+    }
+  return max;
+}
+
+function lastMax(){
+  var max,l,q;
+  l = numberOfValuesInArray.length;
+   q = max = (numberOfValuesInArray.max()/5)*3.5;
+    for(var i = 0; i < l; ++i) {
+      	if(numberOfValuesInArray[i] >= q){
+	        max = i;
+    	}
+    }
+  return max;
+}
+function lastMax2(){
+  var max,l,q,counts;
+  counts = 0;
+  l = numberOfValuesInArray.length;
+   q = max = (numberOfValuesInArray.max()/5)*3.5;
+    for(var i = l-1; i >= 0; --i) {
+      	if(numberOfValuesInArray[i] >= q) {
+	        max = i;
+	        if(counts > 40) {
+	        	break;
+	        }
+    	}
+    	else {
+    		counts++;
+    	}
+    }
+  return max;
+}
+
+function getXandY(arr){
+	for(thisY; thisY < height; thisY++){
+		for(thisX; thisX < width;){
+			thisX++;
+			if(arr[thisY][thisX] == 0){
+			   return ;
+			}
+		}
+		thisX = -1;
+	}
+	   thisY = height;
+	   thisX = width;
+};
+
+function setpixel(value){
+color = [255,0,0];
+var x,y,coord;
+var data = ctx.getImageData(0,0,width,height);
+pix = data.data;
+
+
+for(var i = 0; i < distanceR.length; i++)
+	if (distanceR[i]==value) {
+
+		y = coordArray[(i-1)*2+1];
+		x = coordArray[(i-1)*2];
+
+		coord = y * width * 4 + x*4;
+
+		pix[coord]=color[0];
+	    pix[coord+1]=color[1];
+	    pix[coord+2]=color[2];
+
+	}
+
+data.data = pix;
+putColorData(data);
+
+}
+
+function setpixel2(array){
+color = [255,0,0];
+var x,y,l,coord;
+l = array.length;
+var data = ctx.getImageData(0,0,width,height);
+pix = data.data;
+
+
+for(var i = 0; i < l; ++i) {
+		
+		x = array[i][1];
+		y = array[i][0];
+
+		coord = y * width * 4 + x*4;
+
+		pix[coord]=color[0];
+	    pix[coord+1]=color[1];
+	    pix[coord+2]=color[2];
+
+	}
+
+data.data = pix;
+putColorData(data);
+
+}
+
+function putColorData(img){
+    ctx.putImageData(img, 0, 0);
+}
+
+
+
+function downloadCanvas(link, filename) {
+    link.href = canvas.toDataURL();
+    link.download = filename;
+}
+
+document.getElementById('download').addEventListener('click', function() {
+    downloadCanvas(this, 'test.bmp');
+}, false);
+
+
+
+	histogram=[
+	['Значение R', 'Кол-во точек'],
+	];
+
+
+
+   google.load("visualization", "1", {packages:["corechart"]});
+  var options = {
+     title: 'Гистограмма',
+     hAxis: {title: 'Значение R'},
+     vAxis: {title: 'Кол-во точек'},
+     colors: [],
+    };
+   function drawChart() {
+    var data = google.visualization.arrayToDataTable(
+histogram);
+     var options = options; 
+    var chart = new google.visualization.ColumnChart(document.getElementById('oil'));
+    chart.draw(data, options);
+   }
+
+
+
+//cutArray(arrayPixel,firstArray2[0][0], firstArray[0][1], lastArray2[0][0], lastArray[0][1]);
+function cutArray(array,x1,y1,x2,y2) {
+	var newArray,countX, countY;
+	newArray = [];
+	countY = 0;
+	countX = 0;
+	for(var i = y1; i < y2; ++i) {
+		newArray[countY] = [];
+		for(var j = x1; j < x2; ++j) {
+			newArray[countY][countX] = array[i][j];
+			countX++;
+		}
+		countX = 0;
+		countY++;
+	}
+
+
+	return newArray;
+}
+
+function JsonObject() {
+  this.loadStorage = function(key) {
+    return JSON.parse(localStorage.getItem(key));
+  };
+  this.saveStorage = function(key, array) {
+    localStorage.setItem(key,JSON.stringify(array));
+  };
+}
+
+
+function getArrayPixel2(){
+	var data, light, arr, pix, time1;
+	picLength = width * height;
+	arr=[];
+	for(var i = 0;i<600;i++)
+	    arr[i]=[];
+	for(var i = 0;i<600;i++){
+	    for(var j = 0;j<700;j++){
+	     pix = ctx.getImageData(i,j, 1, 1);
+	     data = pix.data;
+	     arr[i][j]=data[0] ;
+	    }
+	    
+	   }
+
+	  return arr;
+}
+
+
+</script>
+</body>
+</html>

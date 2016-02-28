@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Bug</title>
+	<style>
+  body{
+    background-color: rgba(0,0,0,0.2);
+  }
+	canvas{
+    border: 2px solid #000;
+    cursor:pointer;
+  	}
+  .half{
+    display: inline-block;
+    width: 30%;
+    height: 800px;
+  }
+  .half2{
+  float:left;
+    width: 30%;
+    height: 100px;
+    outline: medium;
+  }
+  	.first{
+  		background-color: rgba(0,0,0,0.3);
+  	}
+  	table{
+  		font-size: 0.85em;
+  		margin-bottom: 20px;
+
+  	}
+  	caption{
+  		font-size: 2em;
+  	}
+	div{
+		height: auto;
+	}
+  	 button, a{
+  		display: inline-block;
+      margin-top:10px;
+  		width: 100px;
+  		text-align:center;
+  		padding: 10px;
+  		border: 1px solid black;
+  		border-radius: 10px;
+      background-color: #2271B3;
+  		cursor: pointer;
+  	}
+  	button:hover{
+  		background-color: rgba(100,0,200,0.2);
+  	}
+    a:hover{
+      background-color: rgba(100,0,200,0.2);
+    }
+  	input[type="file"]{
+  		text-align: center;
+  		padding: 10px;
+  		border: 1px solid black;
+  		border-radius: 10px;
+  		background-color: #2271B3;
+  		cursor: pointer;
+  	}
+
+	</style>
+<script src="jquery.min.js"></script>
+<script>
+var newArray = [];
+var arrayColors = [];
+for(var i = 0; i < 255;i++){
+	arrayColors[i] = i;
+}
+
+
+	function Pixel(x,y){
+	x = x || 0;
+	y = y || 0;
+	this.prevX=x-1;
+	this.prevY=y;
+	this.x=x;
+	this.y=y;
+	this.left=false;
+	this.right=false;
+	this.top=true;
+	this.bottom=false;
+
+	this.startX=x;
+	this.startY=y;
+	this.prevBlackX=x;
+	this.prevBlackY=y;
+	this.r = Math.floor(Math.random()*254);
+	this.g = Math.floor(Math.random()*254);
+	this.b = 0;
+	this.countt = 0;
+	this.rgb=[this.r,this.g,this.b];
+	this.end=false;
+	this.white=0;
+	this.arr;
+
+}
+
+Pixel.prototype.direction = function(){
+var that=this;
+	if(that.top){
+		that.prevX=that.x;
+		that.prevY=that.y;
+		that.y--;
+		that.top=false;
+	}	
+		else
+			if(that.right){
+				that.prevX=that.x;
+				that.prevY=that.y;
+				that.x++;
+				that.right=false;
+			}
+				else
+					if(that.bottom){
+						that.prevX=that.x;
+						that.prevY=that.y;
+						that.y++;
+						that.bottom=false;
+					}	
+						else
+							if(that.left){
+								that.prevX=that.x;
+								that.prevY=that.y;
+								that.x--;
+								that.left=false;
+							}	
+		that.nextIteration(arrayPixel);								
+}
+
+Pixel.prototype.leftDir = function(){
+var that=this;
+
+arrayPixel[that.y][that.x]=that.rgb[0];
+
+	if((that.prevY==that.y)&&(that.prevX<that.x)){
+
+		that.top=true;
+	}
+
+	if((that.prevX==that.x)&&(that.prevY>that.y)){
+
+		that.left=true;
+	}
+
+	if((that.prevY==that.y)&&(that.prevX>that.x)){
+
+		that.bottom=true;
+	}
+
+	if((that.prevX==that.x)&&(that.prevY<that.y)){
+
+		that.right=true;
+	}
+//that.white=0;
+
+}
+
+Pixel.prototype.rightDir = function(){
+var that=this;
+	if((that.prevX==that.x)&&(that.prevY>that.y)){
+
+		that.right=true;
+	}
+	
+	if((that.prevY==that.y)&&(that.prevX<that.x)){
+
+		that.bottom=true;
+	}
+
+	if((that.prevX==that.x)&&(that.prevY<that.y)){
+	
+		that.left=true;
+	}
+
+	if((that.prevY==that.y)&&(that.prevX>that.x)){
+	
+		that.top=true;
+	}
+
+//that.white++;
+that.direction();
+
+
+}
+
+Pixel.prototype.prevBlack = function() {
+
+	if((this.startY==this.y)&&(this.startX==this.x)){
+		this.end=true;
+	}
+	else
+	this.direction();
+}
+
+Pixel.prototype.nextIteration = function(array){
+array = array || false;
+var that=this;
+
+//console.log(" y: "+that.y+" x: "+that.x+" "+array[that.y][that.x]+" "+this.white);
+if(array.length>0)
+	if(array[that.y][that.x]==255){
+
+	//	this.white++;
+	/*	if(this.white==2){
+			//if(array[that.y+1][that.x]<255){
+				
+				
+				that.leftDir();
+				
+			//}
+		}
+			else{*/
+				that.rightDir();
+			//}
+		
+	}
+		else 
+			if(array[that.y][that.x]<255){
+				newArray[this.countt] = [];
+				newArray[this.countt][0] = that.x;
+				newArray[this.countt][1] = that.y;
+				this.countt++;
+	//			this.white=0;
+				that.leftDir();
+				that.prevBlack();
+			}
+
+}
+
+
+
+
+
+Pixel.prototype.dir = function(array){
+var that=this;
+
+	for(that.y=0;that.y<20;that.y++){
+		for(that.x=0;that.x<20;that.x++){
+		
+			//console.log(array[that.x][that.y]);
+
+		if(array[that.x][that.y]<255){
+			break;
+		}
+	}
+
+	//можно убрать второе?x=2 всегда при окончании цикла
+	if((that.x != 20)&&(that.y != 20)){
+		if(array[that.x][that.y]<255)
+		setPixel(0,that.x,that.y);
+			break;
+		}
+	}
+}
+
+
+
+</script>
+</head>
+<body>
+	<div class="size"></div>
+  <div>
+   
+  <div class="half2">
+    <button class="bug" type="button" >Bug</button><br>
+    <a href="perseptron.html" id="bug">Perseptron</a>
+  </div>
+   <div class="half">
+    <canvas id="drawingCanvas" width="600" height="600" ></canvas>
+  </div>
+
+  <div id="oil" style="width: 2000px; height: 400px;"></div>
+  </div>
+  <script>
+  
+
+
+
+function deleteElement(){
+	 var  width, height, arrayPixel, canvas, ctx;
+
+	width = 200;
+	height = 200;
+	arrayPixel = [];
+	coordArray = [];
+
+  Array.prototype.max = function() {
+    return Math.max.apply(null, this);
+  };
+
+  Array.prototype.min = function() {
+    return Math.min.apply(null, this);
+  };
+
+  function setDisabled(elem){
+    $(elem).attr('disabled','');
+  }
+
+  function removeDisabled(elem){
+    $(elem).removeAttr('disabled');
+  }
+
+  function JsonObject() {
+  this.loadStorage = function(key) {
+    return JSON.parse(localStorage.getItem(key));
+  };
+  this.saveStorage = function(key, array) {
+    localStorage.setItem(key,JSON.stringify(array));
+  };
+}
+
+function setpixel2(array){
+color = [255,255,0];
+var x,y,l,coord;
+l = array.length;
+var data = ctx.getImageData(0,0,width,height);
+pix = data.data;
+
+
+for(var i = 0; i < l; ++i) {
+		
+		x = array[i][1];
+		y = array[i][0];
+
+		coord = y * width * 4 + x*4;
+
+		pix[coord]=color[0];
+	    pix[coord+1]=color[1];
+	    pix[coord+2]=color[2];
+
+	}
+
+data.data = pix;
+putColorData(data);
+
+}
+
+
+function putColorData(img) { 
+    ctx.putImageData(img, 0, 0);
+}
+
+function loadCanvas(array){
+	var data, light, arr, pix, picLength, buff1, buff2, l,l1, img;
+	picLength=canvas.width*canvas.height;
+	l = array.length;
+	l1 = array[0].length
+  buff = [];
+	data = ctx.getImageData(0,0,canvas.width,canvas.height);
+	pix = data.data;
+	buff1 = 0;
+	buff2 = 0;
+
+	for(var i = 0, j = 1, n = 2; i < picLength * 4;i += 4,j += 4,n += 4,buff2++){
+		 	pix[i] = array[buff1][buff2];
+		 	pix[j] = array[buff1][buff2];
+		 	pix[n] = array[buff1][buff2];
+
+		 if( buff2 > (l1-2)){
+		 	buff2 = -1;
+		 	++buff1;
+		 }
+	}
+
+	data.data = pix;
+	putColorData(data);
+}
+
+	canvas = document.getElementById('drawingCanvas');
+	ctx = canvas.getContext('2d');
+    jsonObj = new JsonObject();
+
+    arrayPixel = jsonObj.loadStorage('segmentArray');
+
+	canvas.height = arrayPixel.length;
+	canvas.width = arrayPixel[0].length;
+
+	width = canvas.width;
+	height = canvas.height;
+
+	img = new Image();
+    img.src = "0000.bmp";
+    img.setAttribute('crossOrigin', 'anonymous');
+    img.onload = function() {
+    
+	ctx.drawImage(img, 0, 0,width,height);
+    size = document.getElementsByClassName('size');
+    size[0].innerHTML = "Standart image size : " + img.width+" x "+img.height;
+    //document.getElementsByClassName('binary')[0].addEventListener('click', function(){ binarization(119);}, false);
+    loadCanvas(arrayPixel);
+    delete8();
+    deletePixel();
+    //setpixel2(arrayPixel);
+   }; 
+	
+	
+	size = document.getElementsByClassName('size');
+	size[0].innerHTML = "Standart image size : " + canvas.width+" x "+canvas.height;
+	// document.getElementsByClassName('binary')[0].addEventListener('click', function(){ binarization(119);}, false);
+ 
+
+
+	function deletePixel(){
+		var data, light, arr, pix, picLength, buff1, buff2, l,l1, img;
+		picLength=canvas.width*canvas.height;
+		l = arrayPixel.length;
+		l1 = arrayPixel[0].length;
+		data = ctx.getImageData(0,0,canvas.width,canvas.height);
+		pix = data.data;
+
+		for(var i = 0, j = 1, n = 2; i < l*l1;i += 4,j += 4,n += 4){
+		 	pix[i] = 255;
+		 	pix[j] = 255;
+		 	pix[n] = 255;
+		}
+	
+
+		for(var i = 0, j = 1, n = 2; i < l*l1;i += 4,j += 4,n += 4){
+		 	pix[i] = 255;
+		 	pix[j] = 255;
+		 	pix[n] = 255;
+		}
+
+
+	data.data = pix;
+	putColorData(data);
+	}
+
+
+
+
+function delete8(){
+		var data, light, arr, pix, picLength, buff1, buff2, l,l1, img,arrays;
+		picLength=canvas.width*canvas.height;arrays = [];scount = 0;
+		l = arrayPixel.length;
+		l1 = arrayPixel[0].length;
+		data = ctx.getImageData(0,0,canvas.width,canvas.height);
+		pix = data.data;
+		buff2 = 0;
+		buff1 = 0;
+
+
+		for(var i = 0; i < l;i++) {
+			for(var j = 0; j < l1;j++) {
+				if(arrayPixel[i][j] == 0) {
+			 		scount++;
+			 		if(scount>l1-5){
+			 			for(var ii = 0; ii < l1;ii++) {
+			 				arrayPixel[i][ii] = 255;
+			 			}
+			 			scount = 0;
+			 		}
+			 	}else {
+			 		arrays = [];
+			 		scount = 0;
+			 	}
+
+			}
+			scount = 0;
+		}
+
+
+		for(var i = 0; i < l;i++){
+			for(var j = 0; j < 3;j++)
+			 arrayPixel[i][j] = 255;
+		}
+
+		
+
+		for(var i = 0; i < l;i++){
+			for(var j = (l1-5); j < l1; j++)
+			 arrayPixel[i][j] = 255;
+		}
+
+		for(var i = l-5; i < l;i++){
+			for(var j = 0; j < l1; j++)
+			 arrayPixel[i][j] = 255;
+		}
+
+		for(var i = 0, j = 1, n = 2; i < picLength * 4;i += 4,j += 4,n += 4,buff2++){
+		 	pix[i] = arrayPixel[buff1][buff2];
+		 	pix[j] = arrayPixel[buff1][buff2];
+		 	pix[n] = arrayPixel[buff1][buff2];
+
+		 if( buff2 > (l1-2)){
+		 	buff2 = -1;
+		 	++buff1;
+		 }
+	}
+
+	data.data = pix;
+	putColorData(data);
+}
+
+
+}
+
+ document.getElementsByClassName('bug')[0].addEventListener('click', function() {
+  bug();
+}, false);
+deleteElement();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var count,img,width,height,thisX,thisY, titles, all, images, objPixels,countObj, pixel, arrayPixel, canvas, ctx, buffer, img;
+
+ 	count=0;thisY=0;thisX=0;countObj=0;objPixels = [];
+ 	titles = [];all=[];images = [];
+
+
+	canvas = document.getElementById('drawingCanvas');
+	ctx = canvas.getContext('2d');
+	width = canvas.width;
+	height = canvas.height;
+
+
+function bug(){
+//	while(thisY<height && thisX<width){
+	
+		search();	
+		//search();
+		//search();
+		//search();
+		//search();
+		//search();	
+	//}
+
+
+
+
+
+
+
+
+function search(){
+		arrayPixel = getArrayPixel();
+	 	getXandY(arrayPixel);
+	 	objPixels[countObj] = new Pixel(thisX,thisY);
+  		objPixels[countObj].direction();
+  		if(objPixels[countObj].end){
+  		 setArrayPixel(arrayPixel);
+	  	}
+	  	countObj++;
+	  	cutObject();
+}
+
+	
+
+
+function getArrayPixel(){
+	var data, light, arr, pix;
+	picLength=width*height*4;
+	arr=[];
+	for( i = 0;i<height;i++)
+	    arr[i]=[];
+
+	for(var i = 0;i<height;i++){
+	    for(var j = 0;j<width;j++){
+	     pix = ctx.getImageData(j,i, 1, 1);
+	     data = pix.data;
+
+	     light = (data[0] + data[1] + data[2] ) /3;
+	     arr[i][j]=Math.floor(light);
+
+	    }
+	   }
+
+	  return arr;
+}
+function setArrayPixel(array){
+	var data, light, arr, pix;
+	picLength=width*height;
+	arr=[];
+
+	data = ctx.getImageData(0,0,width,height);
+	pix = data.data;
+
+		var r,g,b,o;
+		r=0,g=1,b=2,o=3;
+
+	for(var i = 0;i<height;i++){
+		for(var j = 0;j<width;j++,r+= 4,g+= 4,b+= 4,o+= 4){
+
+	if(objPixels[countObj].rgb[0]==array[i][j]){
+			arr[r]=objPixels[countObj].rgb[0];
+	     	arr[g]=objPixels[countObj].rgb[1];
+	     	arr[b]=objPixels[countObj].rgb[2];
+	     	arr[o]=255;
+	}
+	else{
+			arr[r]=array[i][j];
+	     	arr[g]=array[i][j];
+	     	arr[b]=array[i][j];
+	     	arr[o]=255;
+		}	
+	     	
+		}
+	}
+	     	
+		for(var i = 0,j = 1,n = 2;i<picLength*4;i += 4,j += 4,n += 4){
+		     	pix[i]=arr[i];
+		     	pix[j]=arr[j];
+		     	pix[n]=arr[n];
+		}
+	  data.data=pix;
+	  putColorData(data);
+	}
+
+
+function getXandY(arr){
+var i,j;
+for( i = 1 ;i < height-1;i++){
+	//for( i = height-1;i>1;i--){
+		for(j = 1;j<width-1;j++){
+		   	if(arr[i][j]==0){
+			   thisY=i;
+			   thisX=j;
+			  // console.log(thisX+" : "+thisY);
+			   return ;
+			}
+		}
+		//console.log(thisX+" : "+thisY);
+	
+	}
+
+	   thisY=height;
+	   thisX=width;
+	  // console.log(countObj);
+	   //console.log("end search objects");
+}
+
+
+function putColorData(img){
+
+    ctx.putImageData(img, 0, 0);
+}
+
+/*
+function handleFileSelect(evt){
+    var files = evt.target.files; 
+    	count=0;thisY=0;thisX=0;countObj=0;objPixels = [];
+
+    for (var i = 0, f; f = files[i]; i++) {
+
+      if (!f.type.match('image.*')) {
+        continue;
+      }
+
+      var reader = new FileReader();
+
+      
+      reader.onload = (function(theFile){
+        return function(e) {
+ 
+          titles[count]=escape(theFile.name);
+                	
+          img = new Image();
+          img.src = e.target.result;
+          img.setAttribute('crossOrigin', 'anonymous');
+          images[count]=img; 
+
+         
+           getMass(count);
+          };
+      })(f);
+      
+      
+      reader.readAsDataURL(f);
+    }
+   
+  }
+*/
+         //  getMass(0);
+
+ function getMass(o){
+
+	var arr = [];
+	for( i = 0;i<height;i++)
+	    arr[i]=[];
+	 var pix, data, sum, light,s;
+	  ctx.drawImage(images[o], 0, 0);
+		while(thisY<height && thisX<width){
+			search();		
+		}
+	};
+}
+
+
+function cutObject() {
+/*
+console.log(objPixels[countObj-1].rgb[0]);
+
+var data, light, arr, pix;
+	picLength=width*height*4;
+	arr=[];
+	for( i = 0;i<height;i++)
+	    arr[i]=[];
+
+	for(var i = 0;i<height;i++){
+	    for(var j = 0;j<width;j++){
+	     pix = ctx.getImageData(j,i, 1, 1);
+	     data = pix.data;
+	     if(objPixels[countObj-1].rgb[0]=data[0])
+	     	console.log(i+" : "+j);
+
+	    }
+	   }
+*/
+var X1,X2,Y1,Y2;
+var X = [];
+var Y = [];
+var l = newArray.length;
+for(var i = 0; i < l; i++) {
+	X[i] = newArray[i][0];
+	Y[i] = newArray[i][1];
+}
+
+X1 = X.min();
+X2 = X.max();
+Y1 = Y.min();
+Y2 = Y.max();
+ console.log("x1 : " + X1 + " y1 : " + Y1);
+ console.log("x2 : " + X2 + " y2 : " + Y2);
+ newArray = [];
+ cutArray(arrayPixel,X1,Y1,X2,Y2);
+}
+
+
+function cutArray(array,x1,y1,x2,y2) {
+	var newArrays,countX, countY;
+	newArrays = [];
+	countY = 0;
+	countX = 0;
+	for(var i = y1; i < y2; ++i) {
+		newArrays[countY] = [];
+		for(var j = x1; j < x2; ++j) {
+			newArrays[countY][countX] = array[i][j];
+			countX++;
+		}
+		countX = 0;
+		countY++;
+	}
+
+	if(newArrays.length > 0){
+		jsonObj.saveStorage('obj'+(countObj-1),newArrays);
+    	deletepixeles(x1-1,x2+1,y1-1,y2+1);
+	}
+
+
+}
+
+
+function setArrayPixel2(array,x1,x2,y1,y2) {
+	var data, light, arr, pix;
+	picLength=width*height;
+	arr=[];
+
+	data = ctx.getImageData(0,0,width,height);
+	pix = data.data;
+
+		var r,g,b,o;
+		r=0,g=1,b=2,o=3;
+
+	for(var i = y1;i<y2;i++)
+		for(var j = x1;j<x2;j++,r+= 4,g+= 4,b+= 4,o+= 4){
+
+
+			arr[r]=255;
+	     	arr[g]=255;
+	     	arr[b]=255;
+	     	arr[o]=255;
+
+
+	}
+	     	
+		for(var i = 0,j = 1,n = 2;i<picLength*4;i += 4,j += 4,n += 4){
+		     	pix[i]=arr[i];
+		     	pix[j]=arr[j];
+		     	pix[n]=arr[n];
+		}
+	  data.data=pix;
+	  putColorData(data);
+	}
+
+function deletepixeles(x1,x2,y1,y2){
+		var data, light, arr, pix, picLength, buff1, buff2, l,l1, img,arrays;
+		picLength=canvas.width*canvas.height;arrays = [];scount = 0;
+		l = arrayPixel.length;
+		l1 = arrayPixel[0].length;
+		data = ctx.getImageData(0,0,canvas.width,canvas.height);
+		pix = data.data;
+		buff2 = 0;
+		buff1 = 0;
+
+
+		for(var i = y1; i < y2;i++) {
+			for(var j = x1; j < x2;j++) {
+				arrayPixel[i][j] = 255 
+			 	}
+		}
+
+		for(var i = 0, j = 1, n = 2; i < picLength * 4;i += 4,j += 4,n += 4,buff2++){
+		 	pix[i] = arrayPixel[buff1][buff2];
+		 	pix[j] = arrayPixel[buff1][buff2];
+		 	pix[n] = arrayPixel[buff1][buff2];
+
+		 if( buff2 > (l1-2)){
+		 	buff2 = -1;
+		 	++buff1;
+		 }
+	}
+
+	data.data = pix;
+	putColorData(data);
+}
+function putColorData(img) { 
+    ctx.putImageData(img, 0, 0);
+}
+var a, arrayS = [];
+for(var i = 0; i <20;i++) {
+	a = jsonObj.loadStorage('obj'+i);
+ if(a)
+ arrayS[i] = a;
+else
+	break;
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Perseptron</title>
+	<meta charset="UTF-8">
+		<style>
+	body{
+	background:	rgba(0,0,0,0.2);
+	}
+	canvas{
+    border: 2px solid #000;
+    cursor:pointer;
+  	}
+  	.first{
+  		background-color: rgba(0,0,0,0.3);
+  	}
+  	table{
+  		font-size: 0.85em;
+  		margin-bottom: 20px;
+  	}
+  	caption{
+  		font-size: 2em;
+  	}
+	div{
+		height: auto;
+	}
+  	a{
+  		display: block;
+  		width: 100px;
+  		text-align:center;
+  		padding: 10px;
+  		border: 1px solid black;
+  		background-color: #2271B3;
+  		cursor: pointer;
+	
+  	}
+  	a:hover{
+  		background-color: rgba(100,0,200,0.2);
+  	}
+  	.canv {
+	position:relative;
+	float:left;
+	left:5px;
+	width:20px;
+	height:20px;
+	}
+
+	</style>
+</head>
+<body>
+	<div>
+		<input type="file" class="files" name="files[]" multiple />
+		<a id="download">Download</a>
+		<a href="inde.html" id="perseptron">Perseptron</a>
+	</div>
+
+	<script>
+
+	var width, height, l, ctx, canvas;
+	  function JsonObject() {
+  this.loadStorage = function(key) {
+    return JSON.parse(localStorage.getItem(key));
+  };
+  this.saveStorage = function(key, array) {
+    localStorage.setItem(key,JSON.stringify(array));
+  };
+}
+jsonObj = new JsonObject();/*
+jsonObj.saveStorage('obj0',[123123123,123,1,23,1,231,231,23]);l
+jsonObj.saveStorage('obj1',[123123123,123,1,23,1,231,231,23]);
+jsonObj.saveStorage('obj2',[123123123,123,1,23,1,231,231,23]);
+jsonObj.saveStorage('obj3',[123123123,123,1,23,1,231,231,23]);
+jsonObj.saveStorage('obj4',[123123123,123,1,23,1,231,231,23]);
+jsonObj.saveStorage('obj5',[123123123,123,1,23,1,231,231,23]);
+jsonObj.saveStorage('obj6',[123123123,123,1,23,1,231,231,23]);
+jsonObj.saveStorage('obj7',[123123123,123,1,23,1,231,231,23]);
+*/
+jsonObj.saveStorage('obj16',[0,0,0,0,0,0,0,0]);
+
+var a, arrayS = [],count = 0;
+for(var i = 0; i <100;i++) {
+	a = jsonObj.loadStorage('obj'+i);
+	console.log(i);
+ if(a){
+ 	 arrayS[i] = a;
+ 	var d = document.createElement('canvas');
+	d.className='canv';
+	document.body.appendChild(d);
+ }
+else
+	break;
+}
+
+
+
+function downloadCanvas(link, canvasId, filename) {
+    link.href = document.getElementById(canvasId).toDataURL();
+    link.download = filename;
+}
+
+
+function putColorData(img) { 
+    ctx[count1].putImageData(img, 0, 0);
+}
+var imgs ;
+var count1=0;
+function loadCanvas(array){
+	var data, light, arr, pix, picLength, buff1, buff2, l,l1, img;
+	picLength=canvas[0].width*canvas[0].height;
+	l = array.length;
+	l1 = array[0].length
+  	buff = [];
+
+	data = ctx[count1].getImageData(10,5,l1,l);
+	pix = data.data;
+	buff1 = 0;
+	buff2 = 0;
+	var aa;
+	for(var i = 0, j = 1, n = 2; i < picLength * 4;i += 4,j += 4,n += 4,buff2++){
+		
+	aa = (array[buff1][buff2] < 255)? 0 : 255;
+		 	pix[i] = aa;
+		 	pix[j] = aa;
+		 	pix[n] = aa;
+	
+		 if( buff2 > (l1-2)){
+		 	buff2 = -1;
+		 	++buff1;
+		 }
+		 if(buff1==l)
+		 	break;
+		
+		 
+	}
+
+	data.data = pix;
+	putColorData(data);
+	var iii = canvas[count1].toDataURL("image/png");
+	imgs  = new Image();
+	imgs.src = iii;
+    ctx[count1].drawImage(imgs, 0, 0, 35, 35);
+    count1++;
+}
+/** 
+ * The event handler for the link's onclick event. We give THIS as a
+ * parameter (=the link element), ID of the canvas and a filename.
+*/
+
+
+/*////////////
+var canvas = document.getElementById("mycanvas");
+    var img    = canvas.toDataURL("image/png");
+    document.write('<img src="'+img+'"/>');
+
+ */
+
+document.getElementById('download').addEventListener('click', function() {
+
+    downloadCanvas(this, 'canvas', 'test'+count+'.png');
+    count++;
+}, false);
+
+
+	ctx = [];  canvas = [];
+	canvas = document.getElementsByClassName('canv');
+	l = canvas.length;
+	for(var i=0;i<l;i++)
+	ctx[i] = canvas[i].getContext('2d');
+    
+	for(var i=0;i<l;i++){
+		canvas[i].height = 20;
+		canvas[i].width = 20;
+	}
+
+
+	width = canvas[0].width;
+	height = canvas[0].height;
+
+	img = new Image();
+    img.src = "0000.bmp";
+    img.setAttribute('crossOrigin', 'anonymous');
+    img.onload = function() {
+
+    for(var i=0;i<l;i++)
+	ctx[i].drawImage(img, 0, 0,width,height);
+
+	for(var i=0;i<l;i++)
+    loadCanvas(arrayS[i]);
+    }; 
+	</script>
+</body>
+</html>
